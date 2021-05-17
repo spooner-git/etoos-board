@@ -134,7 +134,10 @@ class Ebs(Company):
 
             for bbs_line in bbs_lines:
                 # 답변 제외
-                bbs_reply_check = bbs_line.attrs['class'][1]
+                if len(bbs_line.attrs['class']) < 2:
+                    bbs_reply_check = 'other'
+                else:
+                    bbs_reply_check = bbs_line.attrs['class'][1]
                 if bbs_reply_check == '':
                     # 오늘 날짜인 경우 처리
                     bbs_date = bbs_line.select('div')[6]
