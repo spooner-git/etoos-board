@@ -1,4 +1,6 @@
 import time
+from datetime import datetime
+
 from bs4 import BeautifulSoup
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
@@ -6,6 +8,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
+from PyQt5 import QtCore
+today = datetime.today()
+today = str(today).split(' ')[0][2:].replace("-", ".")
 print('시스템 준비중....')
 
 
@@ -86,10 +91,9 @@ class Ebs(Company):
         labelstatus.setText('Login 완료')
 
     def get_lecture_list(self):
+        self.go_to_url_page('https://www.ebsi.co.kr/ebs/pot/potg/selectTeacherAllList.ajax', 0)
         lecture_array = []
-        lecture_list = self.soup.select(
-            '#gnbWrap > div.sectionAllmenu.layerWrap > div.allMenuheader > div')
-            # '#reNlnb > form > div.wrap-teacher-all > div > div.teacher-all > div > div.wrap-tabs > ul > li > a')
+        lecture_list = self.soup.select('#modalAllteacher > section > div.modal_container > div > div > div.thead > div')
         for lecture in lecture_list:
             lecture_array.append(lecture.text.strip())
         return lecture_array
@@ -97,212 +101,99 @@ class Ebs(Company):
     def get_teacher_list(self, lecture_array):
         teacher_array = []
         i = 0
-        # 국어,수학,영어,한국사
-        #
-        # teacher_list = self.soup.select('#reNlnb > form > div.wrap-teacher-all > div > div.teacher-all > '
-        #                                 'div > div.wrap-tabs > div > div > ul')
-        teacher_list = self.soup.select('#gnbWrap > div.sectionAllmenu.layerWrap > div.allMenuBody > div')
-
+        self.go_to_url_page('https://www.ebsi.co.kr/ebs/pot/potg/selectTeacherAllList.ajax', 0)
+        teacher_list = self.soup.select('#modalAllteacher > section > div.modal_container > div > div > div.inner_scroll > div > div')
         for teacher in teacher_list:
-            teacher_info = teacher.select('div > ul > li')
-            # print(str(teacher_info))
+            teacher_info = teacher.select('ul > li')
             for data in teacher_info:
                 data = data.select('a')[0]
                 temp = data.get('href')
                 temp2 = temp.split('=')
-                teacher_code = temp2[1].split('&')
-                teacher_name = data.text.split(' ')
-                #강사 중복 제거 - hk.kim 18.01.31
-                duplication_check = 0
-                for teacher_duplication_check in teacher_array:
-                    if teacher_duplication_check.get_code() == teacher_code[0]:
-                        duplication_check = 1
-                        break
-                if duplication_check == 0:
-                    teacher_data = Teacher(lecture_array[i], teacher_name[0], teacher_code[0])
-                    teacher_array.append(teacher_data)
+                teacher_code = temp2[1]
+                teacher_name = data.text
+                teacher_data = Teacher(lecture_array[i], teacher_name, teacher_code)
+                teacher_array.append(teacher_data)
             i += 1
-        #사탐,과탐,직탐,제2외국어,대학별고사 따로
-        # selector 수정 - hk.kim 20.05.17
-        # teacher_list2 = self.soup.select('#reNlnb > form > div.wrap-teacher-all > div > div.teacher-all > '
-        #                                  'div > div.wrap-tabs > div.contents.type ')
-        # # reNlnb > form > div.wrap-teacher-all > div > div.teacher-all > div > div.wrap-tabs > div.contents.type.row3 > div > div:nth-child(1) > div:nth-child(1)
-        # for teacher in teacher_list2:
-        #     teacher_info = teacher.select('div > div > ul > li > a')
-        #
-        #     for data in teacher_info:
-        #         temp = data.get('href')
-        #         temp2 = temp.split('=')
-        #         teacher_code = temp2[1].split('&')
-        #         teacher_name = data.text.split(' ')
-        #         #강사 중복 제거 - hk.kim 18.01.31
-        #         duplication_check = 0
-        #         for teacher_duplication_check in teacher_array:
-        #             if teacher_duplication_check.get_code() == teacher_code[0]:
-        #                 duplication_check = 1
-        #                 break
-        #         if duplication_check == 0:
-        #             teacher_data = Teacher(lecture_array[i], teacher_name[0], teacher_code[0])
-        #             teacher_array.append(teacher_data)
-        #     if teacher_info:
-        #         i += 1
+
         return teacher_array
 
     def get_bbs_count(self, delay_time, end_date, start_date, check_stop_class,
-                      labelstatus):  # processing pause : hk.kim-18.01.28
+                      labelstatus, teacher_code):  # processing pause : hk.kim-18.01.28
         end_point = 0
         counter = []
         counter_data = CounterData()
-        bbs_page = 4
+        bbs_page = 2
         page_counter = 1
-        bbs_page_checker = 0
         counter_data.num = 0
         counter_data.date = ''
-        before_num = []
-        current_num = []
         if page_counter == 1:
             labelstatus.setText('Page_' + str(page_counter) + ' --> Searching...')
-        print(str(start_date))
-        print(str(end_date))
-        while True:
-            # reNcontainer > div > div > div > div.bordList > table > tbody > tr:nth-child(1)
-            # bbs_lines = self.soup.select('#frm > table > tbody > tr')
-            print('test1')
-            bbs_lines = self.soup.select('#reNcontainer > div > div > div > div.bordList > table > tbody > tr.str_Q')
-            # print(str(bbs_lines))
-            bbs_number = None
-            # print(str(before_num))
-            # print(str(current_num))
-            current_num = []
-            bbs_main_check = 0
-            for bbs_line in bbs_lines:
-                # 마지막 페이지를 넘어가려고 하는 경우 처리
-                bbs_main_check = 0
-                bbs_number = bbs_line.select('td:nth-of-type(1)')
-                if bbs_number is None:
-                    bbs_main_check = 1
-                else:
-                    for bbs_number_info in bbs_number:
-                        current_num.append(bbs_number_info.text)
-                        if bbs_number_info.text in before_num:
-                            bbs_main_check = 1
 
-                if bbs_main_check == 0:
-                    bbs_date = bbs_line.select('td:nth-of-type(7)')
-                    for date in bbs_date:
-                        date_text = date.text[2:]
-                        # print(str(date_text))
-                        if date_text <= start_date:
-                            if date_text >= end_date:
-                                if counter_data.num == 0:
+        while True:
+            bbs_lines = self.soup.select('body > div.board_list.type_teacherQna > ul > li.tbody')
+
+            for bbs_line in bbs_lines:
+                # 답변 제외
+                bbs_reply_check = bbs_line.attrs['class'][1]
+                if bbs_reply_check == '':
+                    # 오늘 날짜인 경우 처리
+                    bbs_date = bbs_line.select('div')[6]
+                    date_text = bbs_date.text
+                    if len(date_text) < 6:
+                        date_text = today
+                    date_text = str(date_text)
+                    if date_text <= start_date:
+                        if date_text >= end_date:
+                            if counter_data.num == 0:
+                                dateMac = str(date_text).replace(".", "")
+                                date_info = '20' + dateMac[0:2] + dateMac[2:4] + dateMac[4:6]  # 20180130
+                                counter_data.date = date_info
+                                counter_data.num += 1
+                            else:
+                                compare_date = counter_data.date[2:4] + '.' + counter_data.date[
+                                                                              4:6] + '.' + counter_data.date[6:8]
+                                if str(compare_date) == str(date_text):
+                                    counter_data.num += 1
+                                else:
+                                    counter.append(counter_data)
+                                    counter_data = CounterData()
+                                    counter_data.num = 1
                                     dateMac = str(date_text).replace(".", "")
                                     date_info = '20' + dateMac[0:2] + dateMac[2:4] + dateMac[4:6]  # 20180130
                                     counter_data.date = date_info
-                                    counter_data.num += 1
-                                else:
-                                    compare_date = counter_data.date[2:4] + '.' + counter_data.date[
-                                                                                  4:6] + '.' + counter_data.date[6:8]
-                                    if str(compare_date) == str(date_text):
-                                        counter_data.num += 1
-                                    else:
-                                        counter.append(counter_data)
-                                        counter_data = CounterData()
-                                        counter_data.num = 1
-                                        dateMac = str(date_text).replace(".", "")
-                                        date_info = '20' + dateMac[0:2] + dateMac[2:4] + dateMac[4:6]  # 20180130
-                                        counter_data.date = date_info
-                            else:
-                                if counter_data.num != 0:
-                                    if end_point == 0:
-                                        counter.append(counter_data)
-                                        counter_data = CounterData()
-                                        counter_data.num = 0
-                                        counter_data.date = ''
-                                end_point = 1
-                                break
-            #게시글이 아예 없는 경우
+                        else:
+                            if counter_data.num != 0:
+                                if end_point == 0:
+                                    counter.append(counter_data)
+                                    counter_data = CounterData()
+                                    counter_data.num = 0
+                                    counter_data.date = ''
+                            end_point = 1
+                            break
 
-            before_num = current_num
-            if not bbs_number:
+            #게시글이 아예 없는 경우
+            if len(bbs_lines) == 0:
                 end_point = 1
-            if bbs_main_check == 1:
-                end_point = 1
-            # print(str(counter_data))
-            # print(str(end_point))
+
             if end_point == 1:
                 break
             else:
-                #게시판 연동 확인 - hk.kim 18.01.31
-                pageconnected = 0
-                while pageconnected == 0:
-                    try:
-                        WebDriverWait(self.chrome_driver, 3).until(
-                            EC.presence_of_element_located((By.ID, 'bordPaging')))
-                        pageconnected = 1
-                        time.sleep(2)
-                    except TimeoutException:
-                        print('서버와 통신이 불안정 합니다. 재시도 합니다. Inner')
-                        labelstatus.setText('서버와 통신이 불안정 합니다. 재접속을 시도합니다.')
-
-                if end_point == 1:
-                    break
-                else:
-                    pageconnected = 0
-                    while pageconnected == 0:
-                        try:
-                            link = self.chrome_driver.find_element_by_xpath(
-                                '//*[@id="bordPaging"]/ul/li[' + str(bbs_page) + ']/span')
-                            link.click()
-                            WebDriverWait(self.chrome_driver, 3).until(
-                                EC.presence_of_element_located((By.ID, 'bordPaging')))
-                            pageconnected = 1
-                            time.sleep(delay_time)
-                        except TimeoutException:
-                            print('서버와 통신이 불안정 합니다. 재시도 합니다. Inner')
-                            labelstatus.setText('서버와 통신이 불안정 합니다. 재접속을 시도합니다.')
-                        except NoSuchElementException:
-                            end_point = 1
-                            break
-                    if end_point == 1:
-                        break
-                    # print('last_test5')
-                    page_counter += 1
-                    labelstatus.setText('Page_' + str(page_counter) + ' --> Searching...')
-                    #self.chrome_driver.implicitly_wait(delay_time)
-                    html = self.chrome_driver.page_source
-                    # print('last_test6')
-                    self.soup = BeautifulSoup(html, 'html.parser')
-                    # print('last_test7')
-            # print(str(bbs_page))
-            if bbs_page == 2:
-                bbs_page += 2
-            elif bbs_page == 12:
-                # if bbs_page_checker == 0:
-                #     bbs_page = 4
-                #     bbs_page_checker += 1
-                # else:
-                bbs_page += 1
-            elif bbs_page == 13:
-                bbs_page = 4
-            else:
-                bbs_page += 1
-                #processing pause : hk.kim-18.01.28
-
-            # print('last_test8')
+                self.go_to_url_page('http://www.ebsi.co.kr/ebs/lms/lmsy/courseQnaList.ajax?tchId='
+                                   + teacher_code + '&currentPage='+str(bbs_page)+'&callBy=teacher&tabNm=qna&gotoYn=Y', 0)
+                page_counter += 1
+                labelstatus.setText('Page_' + str(page_counter) + ' --> Searching...')
+            bbs_page += 1
             while True:
                 is_pause = check_stop_class.get_is_pause()
                 if is_pause == 0:
                     break
-            # print('last_test9')
 
-        # print('last_test10')
         if counter_data.num != 0:
             counter.append(counter_data)
             counter_data = CounterData()
             counter_data.num = 0
             counter_data.date = ''
 
-        # print('last_test11')
         return counter
 
     def remove_teacher_by_name(self, teacher_array, remove_teacher_name_list):
@@ -322,6 +213,17 @@ class Ebs(Company):
         for teachers in teacher_list:
             for teacher_name in add_teacher_name_list:
                 if teachers.get_name() == teacher_name:
+                    teacher_array.append(teachers)
+
+        return teacher_array
+
+    def add_teacher_by_name_subject(self, teacher_array, add_teacher_list):
+        # 실제 값을 복사
+        teacher_list = teacher_array[:]
+        teacher_array = []
+        for teachers in teacher_list:
+            for teacher_info in add_teacher_list:
+                if teachers.get_name().lstrip() == teacher_info['name'] and teachers.get_subject().lstrip() == teacher_info['subject']:
                     teacher_array.append(teachers)
 
         return teacher_array

@@ -133,6 +133,7 @@ threadSelector = ""
 
 driver_global = None
 
+
 def setWebDriver(Option):
 	labelstatus2.setText('네트워크 접속중..')
 	global driver_global
@@ -166,7 +167,6 @@ class MyWindow(QMainWindow, form_class):
 		self.label_Status_2.setText('')
 		self.label_22.setText('')
 		# self.autoAddTeacher()
-
 		####
 		#elf.thread = MyThread()
 
@@ -631,9 +631,9 @@ class MyWindow(QMainWindow, form_class):
 			EBSsubjectObject.remove('직업')
 	def checkBoxState10(self):
 		if self.checkBox10.isChecked() == True:
-			EBSsubjectObject.append('일반/진로/교양')
+			EBSsubjectObject.append('일반/진로선택')
 		elif self.checkBox10.isChecked() == False:
-			EBSsubjectObject.remove('일반/진로/교양')
+			EBSsubjectObject.remove('일반/진로선택')
 	def checkBoxStateAll(self):
 		if self.checkBoxAll.isChecked() == True:
 			self.checkBox1.setChecked(True)
@@ -849,7 +849,10 @@ class DataAnalyze(QThread):
 		self.driver = setWebDriver("OFF")
 		labelstatus2.setText('EBS 목록 불러오는 중')
 		ebs.set_driver(self.driver)
-		ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/pot/potn/retrieveTchrSubMain.ebs?Clickz=G001', 0)
+		# ebs.go_to_url_page('https://www.ebsi.co.kr/ebs/pot/poti/main.ebs', 0)
+
+		# self.driver.execute_script('ublPopClose()')
+
 		lecture_array = ebs.get_lecture_list()
 		teacher_array = ebs.get_teacher_list(lecture_array)
 		listWidget2.clear()
@@ -1066,10 +1069,6 @@ class DataAnalyze(QThread):
 		if parsingMode == 0:
 			labelstatus.setText('EBS 집계를 시작합니다.')
 			ebs.set_driver(driver)
-			ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/pot/potl/login.ebs?destination=/ebs/pot/potn/retrieveTchrSubMain.ebs%3FClickz%3DG001&alertYn=N', 0)
-			driver.implicitly_wait(delayTime)
-			ebs.login(EBS_ID, EBS_PW, labelstatus2)
-			ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/pot/potn/retrieveTchrSubMain.ebs?Clickz=G001', 0)
 			# 과목 가져오기
 			lecture_array = ebs.get_lecture_list()
 			# 선생님 리스트 가져오기
@@ -1080,29 +1079,15 @@ class DataAnalyze(QThread):
 			for teachers in teacher_array:
 				labelstatus.setText('EBS ' + str(teachers.get_name()) + ' 선생님 집계중')
 				# print(str(teachers.get_full_info()))
-				ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/pot/potg/retrieveStdQnaList.ebs?teacherId='
-								   + teachers.get_code() + '&bbsType=H600&targetCode=null#;', 1)
+				ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/lms/lmsy/courseQnaList.ajax?tchId='
+								   + teachers.get_code() + '&currentPage=1&callBy=teacher&tabNm=qna&gotoYn=Y', 0)
 				startdate = str(startDate)[2:4] + '.' + str(startDate)[4:6] + '.' + str(startDate)[6:]
 				enddate = str(endDate)[2:4] + '.' + str(endDate)[4:6] + '.' + str(endDate)[6:]
 				#date count : hk.kim-18.01.29
 
-				bbs_counts = ebs.get_bbs_count(delayTime, startdate, enddate, check_stop_class, labelstatus2)  # processing pause : hk.kim-18.01.28
-				#date count : hk.kim-18.01.29
-
-				#dategroup = []
-				#date_countgroup = {}
-				#for counter in bbs_counts:
-				#	dateMac = str(counter.date).replace(".", "")
-				#	date = '20' + dateMac[0:2] + dateMac[2:4] + dateMac[4:6] # 20180130
-				#	dategroup.append(date)
-				#	date_countgroup[date] = str(counter.num)
-					# subjectresultForExcel.append(str(teachers.get_subject()) + ':' + str(teachers.get_name()) + ':' + date + ':' + str(counter.num))
-					# 수학:심주석:20180130:1
-					#preResultForExcel.append(str(counter.date))
-				# EBS에서는 startdate가 과거날짜, enddate가 오늘날짜(최근날짜)
+				bbs_counts = ebs.get_bbs_count(delayTime, startdate, enddate, check_stop_class, labelstatus2, teachers.get_code())  # processing pause : hk.kim-18.01.28
 				startdate_ = datetime.date(int(str(startDate)[0:4]), int(str(startDate)[4:6].lstrip('0')), int(str(startDate)[6:].lstrip('0')))
 				enddate_ = datetime.date(int(str(endDate)[0:4]), int(str(endDate)[4:6].lstrip('0')), int(str(endDate)[6:].lstrip('0')))
-				# duration = int(str(enddate_ - startdate_).split(" ")[0]) + 1
 
 				date_diff = enddate_ - startdate_
 				if startDate == endDate:
@@ -1115,20 +1100,12 @@ class DataAnalyze(QThread):
 				for z in range(0, duration):
 					dates = startdate_ + datetime.timedelta(z)
 					datesFormat = int(str(dates).split('-')[0] + str(dates).split('-')[1] + str(dates).split('-')[2])
-					#count = dategroup.count(str(datesFormat))
-					# date count : hk.kim-18.01.29
 					count = 0
 					for count_info in bbs_counts:
 						if count_info.date == str(datesFormat):
 							count = count_info.num
 
 					subjectresultForExcel.append(str(teachers.get_subject()) + ':' + str(teachers.get_name()) + ':' + str(datesFormat) + ':' + str(count))
-
-					#if count == 0:
-					#	subjectresultForExcel.append(str(teachers.get_subject()) + ':' + str(teachers.get_name()) + ':' + str(datesFormat) + ':' + str(0))
-					#else:
-					#	count_ = date_countgroup[str(datesFormat)]
-					#	subjectresultForExcel.append(str(teachers.get_subject()) + ':' + str(teachers.get_name()) + ':' + str(datesFormat) + ':' + count_)
 
 				driver.implicitly_wait(delayTime)
 				labelstatus.setText('EBS ' + str(teachers.get_name()) + ' 선생님 집계 완료')
@@ -1141,44 +1118,27 @@ class DataAnalyze(QThread):
 		elif parsingMode == 1:
 			labelstatus.setText('EBS 개별 집계를 시작합니다.')
 			ebs.set_driver(driver)
-			ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/pot/potl/login.ebs?destination=/ebs/pot/potn/retrieveTchrSubMain.ebs%3FClickz%3DG001&alertYn=N', 0)
-			driver.implicitly_wait(delayTime)
-			ebs.login(EBS_ID, EBS_PW, labelstatus2)
-			ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/pot/potn/retrieveTchrSubMain.ebs?Clickz=G001', 0)
 			lecture_array = ebs.get_lecture_list()
 			teacher_array = ebs.get_teacher_list(lecture_array)
-			add_teacher_name_list = []
+			add_teacher_list = []
 			for i in range(0, len(selectedParseList2)):
 				split = selectedParseList2[i].split(':')
+				subject = split[0].lstrip()
 				name = split[1].lstrip()
-				add_teacher_name_list.append(name)
-			teacher_array = ebs.add_teacher_by_name(teacher_array, add_teacher_name_list)
+				add_teacher_list.append({'name':name, 'subject':subject})
+			teacher_array = ebs.add_teacher_by_name_subject(teacher_array, add_teacher_list)
 			subjectresultForExcel = []
 			for teachers in teacher_array:
 				labelstatus.setText('EBS ' + str(teachers.get_name()) + ' 선생님 집계중')
-				ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/pot/potg/retrieveStdQnaList.ebs?teacherId='
-								   + teachers.get_code() + '&bbsType=H600&targetCode=null#;', 1)
+				ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/lms/lmsy/courseQnaList.ajax?tchId='
+								   + teachers.get_code() + '&currentPage=1&callBy=teacher&tabNm=qna&gotoYn=Y', 0)
 				startdate = str(startDate)[2:4] + '.' + str(startDate)[4:6] + '.' + str(startDate)[6:]
 				enddate = str(endDate)[2:4] + '.' + str(endDate)[4:6] + '.' + str(endDate)[6:]
-				#date count : hk.kim-18.01.29
-				
-				bbs_counts = ebs.get_bbs_count(delayTime, startdate, enddate, check_stop_class, labelstatus2) #processing pause : hk.kim-18.01.28
 
-				#date count : hk.kim-18.01.29
-				#dategroup = []
-				#date_countgroup = {}
-				#for counter in bbs_counts:
-				#	dateMac = str(counter.date).replace(".", "")
-				#	date = '20' + dateMac[0:2] + dateMac[2:4] + dateMac[4:6] # 20180130
-				#	dategroup.append(date)
-				#	date_countgroup[date] = str(counter.num)
-					# subjectresultForExcel.append(str(teachers.get_subject()) + ':' + str(teachers.get_name()) + ':' + date + ':' + str(counter.num))
-					# 수학:심주석:20180130:1
-					#preResultForExcel.append(str(counter.date))
+				bbs_counts = ebs.get_bbs_count(delayTime, startdate, enddate, check_stop_class, labelstatus2, teachers.get_code()) #processing pause : hk.kim-18.01.28
 				# EBS에서는 startdate가 과거날짜, enddate가 오늘날짜(최근날짜)
 				startdate_ = datetime.date(int(str(startDate)[0:4]), int(str(startDate)[4:6].lstrip('0')), int(str(startDate)[6:8].lstrip('0')))
 				enddate_ = datetime.date(int(str(endDate)[0:4]), int(str(endDate)[4:6].lstrip('0')), int(str(endDate)[6:8].lstrip('0')))
-				# duration = int(str(enddate_ - startdate_).split(" ")[0]) + 1
 
 				date_diff = enddate_ - startdate_
 				if startDate == endDate:
@@ -1197,12 +1157,6 @@ class DataAnalyze(QThread):
 						if count_info.date == str(datesFormat):
 							count = count_info.num
 					subjectresultForExcel.append(str(teachers.get_subject()) + ':' + str(teachers.get_name()) + ':' + str(datesFormat) + ':' + str(count))
-
-					#if count == 0:
-					#	subjectresultForExcel.append(str(teachers.get_subject()) + ':' + str(teachers.get_name()) + ':' + str(datesFormat) + ':' + str(0))
-					#else:
-					#	count_ = date_countgroup[str(datesFormat)]
-					#	subjectresultForExcel.append(str(teachers.get_subject()) + ':' + str(teachers.get_name()) + ':' + str(datesFormat) + ':' + count_)
 
 				driver.implicitly_wait(delayTime)
 				labelstatus.setText('EBS ' + str(teachers.get_name()) + ' 선생님 집계 완료')
