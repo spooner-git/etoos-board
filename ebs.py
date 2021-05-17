@@ -134,8 +134,9 @@ class Ebs(Company):
 
             for bbs_line in bbs_lines:
                 # 답변 제외
+                bbs_reply_check = ''
                 if len(bbs_line.attrs['class']) < 2:
-                    bbs_reply_check = 'other'
+                    bbs_reply_check = ''
                 else:
                     bbs_reply_check = bbs_line.attrs['class'][1]
                 if bbs_reply_check == '':
