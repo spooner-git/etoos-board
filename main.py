@@ -1127,8 +1127,18 @@ class DataAnalyze(QThread):
 				name = split[1].lstrip()
 				add_teacher_list.append({'name':name, 'subject':subject})
 			teacher_array = ebs.add_teacher_by_name_subject(teacher_array, add_teacher_list)
+
 			subjectresultForExcel = []
+			end_teacher_list = []
 			for teachers in teacher_array:
+				check_duplicate_teacher = False
+				for end_teacher in end_teacher_list:
+					if str(end_teacher.get_code()) == str(teachers.get_code()):
+						check_duplicate_teacher = True
+						break
+				if check_duplicate_teacher:
+					continue
+				end_teacher_list.append(teachers)
 				labelstatus.setText('EBS ' + str(teachers.get_name()) + ' 선생님 집계중')
 				ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/lms/lmsy/courseQnaList.ajax?tchId='
 								   + teachers.get_code() + '&currentPage=1&callBy=teacher&tabNm=qna&gotoYn=Y', 0)
@@ -1163,6 +1173,7 @@ class DataAnalyze(QThread):
 				excelFile = workBook(filepath + 'EBS_개별_' + str(startDate) + '-' + str(endDate) + '.xlsx')
 				Ebs.xlsxWrite(excelFile, subjectresultForExcel)
 				excelFile.close()
+
 			labelstatus.setText('EBS 개별 집계 종료 : 엑셀파일을 확인해주세요')
 			#엑셀 출력 코드 추가 필요
 
