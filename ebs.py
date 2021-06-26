@@ -111,6 +111,14 @@ class Ebs(Company):
                 temp2 = temp.split('=')
                 teacher_code = temp2[1]
                 teacher_name = data.text
+
+                check_duplicate_teacher = False
+                for teacher_array_info in teacher_array:
+                    if str(teacher_array_info.get_subject()) == str(lecture_array[i]) and str(teacher_array_info.get_code()) == str(teacher_code):
+                        check_duplicate_teacher = True
+                        break
+                if check_duplicate_teacher:
+                    continue
                 teacher_data = Teacher(lecture_array[i], teacher_name, teacher_code)
                 teacher_array.append(teacher_data)
             i += 1
