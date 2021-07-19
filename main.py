@@ -1073,10 +1073,22 @@ class DataAnalyze(QThread):
 			lecture_array = ebs.get_lecture_list()
 			# 선생님 리스트 가져오기
 			teacher_array = ebs.get_teacher_list(lecture_array)
+			# 선생님 코드 업데이트
+			teacher_array = ebs.update_teacher_code(teacher_array)
 			add_subject_name_list = EBSsubjectObject[:]
 			teacher_array = ebs.add_teacher_by_subject(teacher_array, add_subject_name_list)
 			subjectresultForExcel = []
+			end_teacher_list = []
 			for teachers in teacher_array:
+				# 선생님 중복 걸러내기
+				check_duplicate_teacher = False
+				for end_teacher in end_teacher_list:
+					if str(end_teacher.get_code()) == str(teachers.get_code()):
+						check_duplicate_teacher = True
+						break
+				if check_duplicate_teacher:
+					continue
+				end_teacher_list.append(teachers)
 				labelstatus.setText('EBS ' + str(teachers.get_name()) + ' 선생님 집계중')
 				# print(str(teachers.get_full_info()))
 				ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/lms/lmsy/courseQnaList.ajax?tchId='
@@ -1127,10 +1139,13 @@ class DataAnalyze(QThread):
 				name = split[1].lstrip()
 				add_teacher_list.append({'name':name, 'subject':subject})
 			teacher_array = ebs.add_teacher_by_name_subject(teacher_array, add_teacher_list)
+			# 선생님 코드 업데이트
+			teacher_array = ebs.update_teacher_code(teacher_array)
 
 			subjectresultForExcel = []
 			end_teacher_list = []
 			for teachers in teacher_array:
+				# 선생님 중복 걸러내기
 				check_duplicate_teacher = False
 				for end_teacher in end_teacher_list:
 					if str(end_teacher.get_code()) == str(teachers.get_code()):

@@ -125,6 +125,16 @@ class Ebs(Company):
 
         return teacher_array
 
+    def update_teacher_code(self, teacher_array):
+        # self.go_to_url_page('/ebs/pot/potg/retrieveCourseH3TeacherInfo.ebs?dstgCd=', 0)
+        for teachers in teacher_array:
+            self.go_to_url_page('https://www.ebsi.co.kr/ebs/pot/potg/retrieveCourseH3TeacherInfo.ebs?dstgCd=' + teachers.get_code(), 0)
+
+            tch_code_line = self.soup.find('input', {"name":"tchId"})
+            teachers.set_code(tch_code_line.attrs['value'])
+
+        return teacher_array
+
     def get_bbs_count(self, delay_time, end_date, start_date, check_stop_class,
                       labelstatus, teacher_code):  # processing pause : hk.kim-18.01.28
         end_point = 0
