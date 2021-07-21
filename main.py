@@ -631,9 +631,9 @@ class MyWindow(QMainWindow, form_class):
 			EBSsubjectObject.remove('직업')
 	def checkBoxState10(self):
 		if self.checkBox10.isChecked() == True:
-			EBSsubjectObject.append('일반/진로선택')
+			EBSsubjectObject.append('일반/진로/교양')
 		elif self.checkBox10.isChecked() == False:
-			EBSsubjectObject.remove('일반/진로선택')
+			EBSsubjectObject.remove('일반/진로/교양')
 	def checkBoxStateAll(self):
 		if self.checkBoxAll.isChecked() == True:
 			self.checkBox1.setChecked(True)
