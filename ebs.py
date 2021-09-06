@@ -306,7 +306,7 @@ class Ebs(Company):
             subject = split[0]
             if subject == '수시논술':
                 subject = '대학별고사'
-            teacher = split[1]
+            teacher = split[1].lstrip()
             date = split[2]
             count = split[3]
             dateformat = date[0:4] + '-' + date[4:6] + '-' + date[6:]
