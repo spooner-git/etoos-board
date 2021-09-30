@@ -222,7 +222,7 @@ class CalcMegastudy:  # 선생,과목, 게시판주소등을 토대로 본격적
 				print('try1')
 				self.driver.get(self.url)
 				print('driver.get(url)')
-				WebDriverWait(self.driver, 40).until(EC.presence_of_element_located((By.ID, 'paging_wrap')))
+				WebDriverWait(self.driver, 60).until(EC.presence_of_element_located((By.ID, 'paging_wrap')))
 				print('WebdriverWait')
 				time.sleep(self.waitTime)
 				print('timesleep')
@@ -253,7 +253,7 @@ class CalcMegastudy:  # 선생,과목, 게시판주소등을 토대로 본격적
 			pageconnected = 0
 			while pageconnected == 0:
 				try:
-					WebDriverWait(self.driver, 60).until(EC.presence_of_element_located((By.ID, 'paging_wrap')))
+					WebDriverWait(self.driver, 180).until(EC.presence_of_element_located((By.ID, 'paging_wrap')))
 					print('페이지 가져오는 중')
 					labelstatus.setText('페이지 가져오는 중')
 					pageconnected = 1
