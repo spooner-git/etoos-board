@@ -13,9 +13,6 @@ from daesung import GoDaesung
 from daesung import SetDaesung
 from daesung import CalcDaesung
 from ebs import Ebs
-from skyedu import GoSkyedu
-from skyedu import SetSkyedu
-from skyedu import CalcSkyedu
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
@@ -26,7 +23,7 @@ from selenium import webdriver
 
 form_class = uic.loadUiType("GUIMegastudy.ui")[0]
 
-site = {'메가스터디':'MEGA', 'EBSi':'EBS', '대성 마이맥':'DS', '스카이 에듀':'SKY'}
+site = {'메가스터디':'MEGA', 'EBSi':'EBS', '대성 마이맥':'DS'}
 department = {
 				# 'MEGA':
 				# 	{'국어' : 'divMenuTecList1', '수학' : 'divMenuTecList2', '영어' : 'divMenuTecList3', '한국사' : 'divMenuTecList4', '사회' : 'divMenuTecList5', '과학' : 'divMenuTecList6', '대학별고사' : 'divMenuTecList7', '제2외국어한문' : 'divMenuTecList8'}
@@ -35,14 +32,11 @@ department = {
 					{'국어' : '0', '수학' : '1', '영어' : '2', '한국사' : '3', '사회' : '4', '과학' : '5', '대학별고사' : '6', '제2외국어한문' : '7'}
 				,'DS':
 					{'국어' : 'li01', '수학' : 'li02', '영어' : 'li03', '한국사' : 'li10', '사회' : 'li04', '과학' : 'li05', '대학별고사' : 'li07', '제2외국어한문' : 'li06'}
-				,'SKY':
-					{'국어' : '국어', '수학' : '수학', '영어' : '영어', '한국사' : '한국사', '사회' : '사회', '과학' : '과학', '대학별고사' : '대학별고사', '제2외국어' : '제2외국어', '월간대치동':'월간대치동', '내신전문':'내신전문'}
-			 }
+			}
 
 SelectedSite = []
 MegasubjectObject = []  # 사용자가 선택한 과목들만 이 리스트에 담아줘야함
 DSsubjectObject = []
-SKYsubjectObject = []
 EBSsubjectObject = []
 
 korean = None
@@ -69,18 +63,6 @@ dsforeign = None
 ebs = Ebs('http://www.ebsi.co.kr/index.jsp')
 # EBS 객체
 
-# 스카이에듀 객체
-skykorean = None
-skymath = None
-skyenglish = None
-skykorhistory = None
-skysociety = None
-skyscience = None
-skyuniv = None
-skyforeign = None
-skydaechi = None
-skynaesin = None
-# 스카이에듀 객체
 
 EBS_ID = ""
 EBS_PW = ""
@@ -181,11 +163,9 @@ class MyWindow(QMainWindow, form_class):
 		self.listWidget.setSelectionMode(QAbstractItemView.MultiSelection)
 		self.listWidget_2.setSelectionMode(QAbstractItemView.MultiSelection)
 		self.listWidget_3.setSelectionMode(QAbstractItemView.MultiSelection)
-		self.listWidget_4.setSelectionMode(QAbstractItemView.MultiSelection)
 		self.listWidget_5.setSelectionMode(QAbstractItemView.MultiSelection)
 		self.listWidget_6.setSelectionMode(QAbstractItemView.MultiSelection)
 		self.listWidget_7.setSelectionMode(QAbstractItemView.MultiSelection)
-		self.listWidget_8.setSelectionMode(QAbstractItemView.MultiSelection)
 		#self.listWidget.show()
 		#self.listWidget_2.show()
 
@@ -193,7 +173,6 @@ class MyWindow(QMainWindow, form_class):
 		self.checkBox_MEGA.stateChanged.connect(self.checkBoxMEGA)
 		self.checkBox_EBS.stateChanged.connect(self.checkBoxEBS)
 		self.checkBox_DS.stateChanged.connect(self.checkBoxDS)
-		self.checkBox_SKY.stateChanged.connect(self.checkBoxSKY)
 		self.checkBox1.stateChanged.connect(self.checkBoxState1)
 		self.checkBox2.stateChanged.connect(self.checkBoxState2)
 		self.checkBox3.stateChanged.connect(self.checkBoxState3)
@@ -253,8 +232,6 @@ class MyWindow(QMainWindow, form_class):
 		listWidget2 = self.listWidget_2
 		global listWidget3
 		listWidget3 = self.listWidget_3
-		global listWidget4
-		listWidget4 = self.listWidget_4
 
 		global pauseButton
 		pauseButton = self.pushButton_2
@@ -349,18 +326,7 @@ class MyWindow(QMainWindow, form_class):
 			self.listWidget_3.clearSelection()
 			#print(selectedParseList3)
 
-		elif self.tabWidget.currentIndex() == 3:  # 스카이에듀 탭
-			self.listWidget_8.clear()
-			global selectedParseList4
-			selectedParseList4 = []
-			selected = [item.text() for item in self.listWidget_4.selectedItems()]
-			for i in range(0, len(selected)):
-				self.listWidget_8.addItem(selected[i])
-				selectedParseList4.append(selected[i])
-			self.listWidget_4.clearSelection()
-			#print(selectedParseList4)
-
-		if len(selectedParseList) > 0 or len(selectedParseList2) > 0 or len(selectedParseList3) > 0 or len(selectedParseList4) > 0:
+		if len(selectedParseList) > 0 or len(selectedParseList2) > 0 or len(selectedParseList3) > 0:
 			self.lock_CheckBox()
 			global parsingMode
 			parsingMode = 1
@@ -393,16 +359,7 @@ class MyWindow(QMainWindow, form_class):
 				self.listWidget_7.addItem(selectedParseList3[j])
 			#print(selectedParseList3)
 
-		elif self.tabWidget.currentIndex() == 3:  # 스카이에듀 탭
-			selected = [item.text() for item in self.listWidget_8.selectedItems()]
-			self.listWidget_8.clear()
-			for i in range(0, len(selected)):
-				selectedParseList4.remove(selected[i])
-			for j in range(0, len(selectedParseList4)):
-				self.listWidget_8.addItem(selectedParseList4[j])
-			#print(selectedParseList4)
-
-		if len(selectedParseList) == 0 and len(selectedParseList2) == 0 and len(selectedParseList3) == 0 and len(selectedParseList4) == 0:
+		if len(selectedParseList) == 0 and len(selectedParseList2) == 0 and len(selectedParseList3) == 0:
 			self.unlock_CheckBox()
 			global parsingMode
 			parsingMode = 0
@@ -415,7 +372,6 @@ class MyWindow(QMainWindow, form_class):
 		self.checkBox_MEGA.setEnabled(False)
 		self.checkBox_EBS.setEnabled(False)
 		self.checkBox_DS.setEnabled(False)
-		self.checkBox_SKY.setEnabled(False)
 		self.checkBox1.setEnabled(False)
 		self.checkBox2.setEnabled(False)
 		self.checkBox3.setEnabled(False)
@@ -432,7 +388,6 @@ class MyWindow(QMainWindow, form_class):
 		self.checkBox_MEGA.setEnabled(True)
 		self.checkBox_EBS.setEnabled(True)
 		self.checkBox_DS.setEnabled(True)
-		self.checkBox_SKY.setEnabled(True)
 		self.checkBox1.setEnabled(True)
 		self.checkBox2.setEnabled(True)
 		self.checkBox3.setEnabled(True)
@@ -524,105 +479,80 @@ class MyWindow(QMainWindow, form_class):
 			SelectedSite.append('DS')
 		elif self.checkBox_DS.isChecked() == False:
 			SelectedSite.remove('DS')
-	def checkBoxSKY(self):
-		if self.checkBox_SKY.isChecked() == True:
-			SelectedSite.append('SKY')
-		elif self.checkBox_SKY.isChecked() == False:
-			SelectedSite.remove('SKY')
 
 	def checkBoxState1(self):
 		if self.checkBox1.isChecked() == True:
 			MegasubjectObject.append(korean)
 			DSsubjectObject.append(dskorean)
-			SKYsubjectObject.append(skykorean)
 			EBSsubjectObject.append('국어')
 		elif self.checkBox1.isChecked() == False:
 			MegasubjectObject.remove(korean)
 			DSsubjectObject.remove(dskorean)
-			SKYsubjectObject.remove(skykorean)
 			EBSsubjectObject.remove('국어')
 	def checkBoxState2(self):
 		if self.checkBox2.isChecked() == True:
 			MegasubjectObject.append(math)
 			DSsubjectObject.append(dsmath)
-			SKYsubjectObject.append(skymath)
 			EBSsubjectObject.append('수학')
 		elif self.checkBox2.isChecked() == False:
 			MegasubjectObject.remove(math)
 			DSsubjectObject.remove(dsmath)
-			SKYsubjectObject.remove(skymath)
 			EBSsubjectObject.remove('수학')
 	def checkBoxState3(self):
 		if self.checkBox3.isChecked() == True:
 			MegasubjectObject.append(english)
 			DSsubjectObject.append(dsenglish)
-			SKYsubjectObject.append(skyenglish)
 			EBSsubjectObject.append('영어')
 		elif self.checkBox3.isChecked() == False:
 			MegasubjectObject.remove(english)
 			DSsubjectObject.remove(dsenglish)
-			SKYsubjectObject.remove(skyenglish)
 			EBSsubjectObject.remove('영어')
 	def checkBoxState4(self):
 		if self.checkBox4.isChecked() == True:
 			MegasubjectObject.append(korhistory)
 			DSsubjectObject.append(dskorhistory)
-			SKYsubjectObject.append(skykorhistory)
 			EBSsubjectObject.append('한국사')
 		elif self.checkBox4.isChecked() == False:
 			MegasubjectObject.remove(korhistory)
 			DSsubjectObject.remove(dskorhistory)
-			SKYsubjectObject.remove(skykorhistory)
 			EBSsubjectObject.remove('한국사')
 	def checkBoxState5(self):
 		if self.checkBox5.isChecked() == True:
 			MegasubjectObject.append(society)
 			DSsubjectObject.append(dssociety)
-			SKYsubjectObject.append(skysociety)
 			EBSsubjectObject.append('사회')
 		elif self.checkBox5.isChecked() == False:
 			MegasubjectObject.remove(society)
 			DSsubjectObject.remove(dssociety)
-			SKYsubjectObject.remove(skysociety)
 			EBSsubjectObject.remove('사회')
 	def checkBoxState6(self):
 		if self.checkBox6.isChecked() == True:
 			MegasubjectObject.append(science)
 			DSsubjectObject.append(dsscience)
-			SKYsubjectObject.append(skyscience)
 			EBSsubjectObject.append('과학')
 		elif self.checkBox6.isChecked() == False:
 			MegasubjectObject.remove(science)
 			DSsubjectObject.remove(dsscience)
-			SKYsubjectObject.remove(skyscience)
 			EBSsubjectObject.remove('과학')
 	def checkBoxState7(self):
 		if self.checkBox7.isChecked() == True:
 			MegasubjectObject.append(univ)
 			DSsubjectObject.append(dsuniv)
-			SKYsubjectObject.append(skyuniv)
-			# SKYsubjectObject.append(skydaechi)
-			# SKYsubjectObject.append(skynaesin)
         	# 수정 - hk.kim 20.05.17
 			EBSsubjectObject.append('대학별고사')
 		elif self.checkBox7.isChecked() == False:
 			MegasubjectObject.remove(univ)
 			DSsubjectObject.remove(dsuniv)
-			SKYsubjectObject.remove(skyuniv)
-			# SKYsubjectObject.remove(skydaechi)
-			# SKYsubjectObject.remove(skynaesin)
         	# 수정 - hk.kim 20.05.17
 			EBSsubjectObject.remove('대학별고사')
 	def checkBoxState8(self):
 		if self.checkBox8.isChecked() == True:
 			MegasubjectObject.append(foreign)
 			DSsubjectObject.append(dsforeign)
-			SKYsubjectObject.append(skyforeign)
 			EBSsubjectObject.append('제2외국어')
 		elif self.checkBox8.isChecked() == False:
 			MegasubjectObject.remove(foreign)
 			DSsubjectObject.remove(dsforeign)
-			SKYsubjectObject.remove(skyforeign)
 			EBSsubjectObject.remove('제2외국어')
 	def checkBoxState9(self):
 		if self.checkBox9.isChecked() == True:
@@ -749,8 +679,11 @@ class DataAnalyze(QThread):
 					labelstatus2.setText('메가스터디 목록 불러오기 완료')
 					self.driver.quit()
 				# 와드
-				except:
+				except Exception as e:
 					labelstatus2.setText('메가스터디 목록 불러오기 실패')
+					f = open("elog.txt", "a")
+					f.write('main-685: ' + str(e))
+					f.close()
 					self.driver.quit()
 			elif tabWidgetIndex == 1:
 				try:
@@ -758,8 +691,11 @@ class DataAnalyze(QThread):
 					self.settingEBS()
 					labelstatus2.setText('EBS 목록 불러오기 완료')
 					self.driver.quit()
-				except:
+				except Exception as e:
 					labelstatus2.setText('EBS 목록 불러오기 실패')
+					f = open("elog.txt", "a")
+					f.write('main-697: ' + str(e))
+					f.close()
 					self.driver.quit()
 			elif tabWidgetIndex == 2:
 				try:
@@ -767,45 +703,40 @@ class DataAnalyze(QThread):
 					self.settingDS()
 					labelstatus2.setText('대성마이맥 목록 불러오기 완료')
 					self.driver.quit()
-				except:
+				except Exception as e:
 					labelstatus2.setText('대성마이맥 목록 불러오기 실패')
-					self.driver.quit()
-			elif tabWidgetIndex == 3:
-				try:
-					labelstatus2.setText('스카이에듀 목록 불러오는 중..')
-					self.settingSKY()
-					labelstatus2.setText('스카이에듀 목록 불러오기 완료')
-					self.driver.quit()
-				except:
-					labelstatus2.setText('스카이에듀 목록 불러오기 실패')
+					f = open("elog.txt", "a")
+					f.write('main-709: ' + str(e))
+					f.close()
 					self.driver.quit()
 			
 
 	def updateTList(self):
 		self.driver = setWebDriver('OFF')
 		errorMessage = []
+		errorLog = []
 		labelstatus2.setText('메가스터디 목록 불러오는 중')
 		try:
 			self.settingMega()
-		except:
+		except Exception as e:
 			errorMessage.append('메가')
+			errorLog.append(e)
 		labelstatus2.setText('EBS 목록 불러오는 중')
 		try:
 			self.settingEBS()
-		except:
+		except Exception as e:
 			errorMessage.append('EBS')
+			errorLog.append(e)
 		labelstatus2.setText('대성마이맥 목록 불러오는 중')
 		try:
 			self.settingDS()
-		except:
+		except Exception as e:
 			errorMessage.append('대성')
-		labelstatus2.setText('스카이에듀 목록 불러오는 중')
-		try:
-			self.settingSKY()
-		except:
-			errorMessage.append('스카이')
 		if len(errorMessage) > 0:
 			labelstatus2.setText(','.join(errorMessage) +' 로딩 실패')
+			f = open("elog.txt", "a")
+			f.write('main-738: ' + str(errorLog.join(", /n")))
+			f.close()
 		else:
 			labelstatus2.setText('선생님 목록 불러오기 완료')
 		self.driver.quit()
@@ -893,53 +824,12 @@ class DataAnalyze(QThread):
 			listWidget3.addItem(DSTeacherList[e])
 		DSsubjectObject = []
 
-	def settingSKY(self):
-		self.driver = setWebDriver('OFF')
-		labelstatus2.setText('스카이에듀 목록 불러오는 중')
-		Sky = GoSkyedu(self.driver)  # 스카이에듀는 드라이버 없이 beautifulsoup으로만 가져올 수 있음
-		tpage = Sky.tpage()
-		global skykorean
-		global skymath
-		global skyenglish
-		global skykorhistory
-		global skysociety
-		global skyscience
-		global skyuniv
-		global skyforeign
-		global skydaechi
-		global skynaesin
-		skykorean = SetSkyedu(department['SKY']['국어'], tpage)
-		skymath = SetSkyedu(department['SKY']['수학'], tpage)
-		skyenglish = SetSkyedu(department['SKY']['영어'], tpage)
-		skykorhistory = SetSkyedu(department['SKY']['한국사'], tpage)
-		skysociety = SetSkyedu(department['SKY']['사회'], tpage)
-		skyscience = SetSkyedu(department['SKY']['과학'], tpage)
-		skyuniv = SetSkyedu(department['SKY']['대학별고사'], tpage)
-		skyforeign = SetSkyedu(department['SKY']['제2외국어'], tpage)
-		# skydaechi = SetSkyedu(department['SKY']['월간대치동'], tpage)
-		# skynaesin = SetSkyedu(department['SKY']['내신전문'], tpage)
-
-		# SKYsubjectObject = [skykorean, skymath, skyenglish, skykorhistory, skysociety, skyscience, skyuniv, skyforeign, skydaechi, skynaesin]
-		# SKYsubjectObject = [skykorean, skymath, skyenglish, skykorhistory, skysociety, skyscience, skyuniv, skyforeign, skynaesin]
-		SKYsubjectObject = [skykorean, skymath, skyenglish, skykorhistory, skysociety, skyscience, skyuniv, skyforeign]
-		lenSKY = len(SKYsubjectObject)
-		SKYTeacherList = []
-		for a in range(0, lenSKY):
-			SKYsubjectTList = SKYsubjectObject[a].getFullList()
-			for s in range(0, len(SKYsubjectTList)):
-				SKYTeacherList.append(SKYsubjectTList[s])
-		listWidget4.clear()
-		for d in range(0, len(SKYTeacherList)):
-			listWidget4.addItem(SKYTeacherList[d])
-		SKYsubjectObject = []
-
-
 	def analyzeStart(self):
 		driver = setWebDriver(OPT1)  # 페이지 넘어가면서 파싱을 위해 웹드라이버 셋팅
 		# driver.set_page_load_timeout(15)
 		if parsingMode == 0:
 			# 와드
-			# try:
+			try:
 				for site in SelectedSite:
 					if site == 'MEGA':
 						labelstatus15.setText(str(strftime("%Y-%m-%d %H:%M")))
@@ -953,51 +843,50 @@ class DataAnalyze(QThread):
 						labelstatus19.setText(str(strftime("%Y-%m-%d %H:%M")))
 						self.analyzeDS(driver)
 						labelstatus20.setText(str(strftime("%Y-%m-%d %H:%M")))
-					elif site == 'SKY':
-						labelstatus21.setText(str(strftime("%Y-%m-%d %H:%M")))
-						self.analyzeSKY(driver)
-						labelstatus22.setText(str(strftime("%Y-%m-%d %H:%M")))
 				labelstatus.setText('집계 완료. 엑셀 파일을 확인해주세요')
 				startButton.setEnabled(True)
 				pauseButton.setDisabled(True)
 				resetButton.setDisabled(True)
 				driver.quit()
 			# 와드
-			# except:
-			# 	labelstatus.setText('집계 오류 - main-908')
-			# 	startButton.setEnabled(True)
-			# 	pauseButton.setDisabled(True)
-			# 	resetButton.setDisabled(True)
-			# 	driver.quit()
+			except Exception as e:
+				f = open("elog.txt", "a")
+				f.write('main-908: ' + str(e))
+				f.close()
+				labelstatus.setText('집계 오류 - main-908')
+				startButton.setEnabled(True)
+				pauseButton.setDisabled(True)
+				resetButton.setDisabled(True)
+				driver.quit()
 		elif parsingMode == 1:
-			# try:
-			if len(selectedParseList) > 0:
-				labelstatus15.setText(str(strftime("%Y-%m-%d %H:%M")))
-				self.analyzeMega(driver)
-				labelstatus16.setText(str(strftime("%Y-%m-%d %H:%M")))
-			if len(selectedParseList2) > 0:
-				labelstatus17.setText(str(strftime("%Y-%m-%d %H:%M")))
-				self.analyzeEBS(driver)
-				labelstatus18.setText(str(strftime("%Y-%m-%d %H:%M")))
-			if len(selectedParseList3) > 0:
-				labelstatus19.setText(str(strftime("%Y-%m-%d %H:%M")))
-				self.analyzeDS(driver)
-				labelstatus20.setText(str(strftime("%Y-%m-%d %H:%M")))
-			if len(selectedParseList4) > 0:
-				labelstatus21.setText(str(strftime("%Y-%m-%d %H:%M")))
-				self.analyzeSKY(driver)
-				labelstatus22.setText(str(strftime("%Y-%m-%d %H:%M")))
-			startButton.setEnabled(True)
-			pauseButton.setDisabled(True)
-			resetButton.setDisabled(True)
-			labelstatus.setText('개별 집계 완료. 엑셀 파일을 확인해주세요')
-			driver.quit()
-			# except:
-			# 	startButton.setEnabled(True)
-			# 	pauseButton.setDisabled(True)
-			# 	resetButton.setDisabled(True)
-			# 	labelstatus.setText('집계 오류 - main-940')
-			# 	driver.quit()
+			try:
+				if len(selectedParseList) > 0:
+					labelstatus15.setText(str(strftime("%Y-%m-%d %H:%M")))
+					self.analyzeMega(driver)
+					labelstatus16.setText(str(strftime("%Y-%m-%d %H:%M")))
+				if len(selectedParseList2) > 0:
+					labelstatus17.setText(str(strftime("%Y-%m-%d %H:%M")))
+					self.analyzeEBS(driver)
+					labelstatus18.setText(str(strftime("%Y-%m-%d %H:%M")))
+				if len(selectedParseList3) > 0:
+					labelstatus19.setText(str(strftime("%Y-%m-%d %H:%M")))
+					self.analyzeDS(driver)
+					labelstatus20.setText(str(strftime("%Y-%m-%d %H:%M")))
+
+				startButton.setEnabled(True)
+				pauseButton.setDisabled(True)
+				resetButton.setDisabled(True)
+				labelstatus.setText('개별 집계 완료. 엑셀 파일을 확인해주세요')
+				driver.quit()
+			except:
+				f = open("elog.txt", "a")
+				f.write('main-940: ' + str(e))
+				f.close()
+				startButton.setEnabled(True)
+				pauseButton.setDisabled(True)
+				resetButton.setDisabled(True)
+				labelstatus.setText('집계 오류 - main-940')
+				driver.quit()
 	def analyzeMega(self, driver):
 		global labelstatus
 		global check_stop_class
@@ -1020,17 +909,22 @@ class DataAnalyze(QThread):
 				SubjectList = MegasubjectObject[x].getSubjectList()
 				
 				for i in range(0, len(IDList)):
-					labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계중  ' + str(progress + i + 1) + '/' + str(selectedPersonNum))
-					calcBoards = CalcMegastudy(IDList[i], endDate, startDate, delayTime, driver)  # url, startdate, enddate, waitTime, chromedriver
-					semiresult = calcBoards.calcBoard(check_stop_class, labelstatus2)  # processing pause : hk.kim-18.01.28
-					result = calcBoards.dataResult(semiresult, NameList[i], SubjectList[0])  # calcBoardResult, teacherName, subjectName
-					for j in range(0, len(result)):
-						subjectresultForExcel.append(result[j])
-					excelFile = workBook(filepath + '메가스터디_' + str(startDate) + '-' + str(endDate) + '.xlsx')
-					calcBoards.xlsxWrite(excelFile, subjectresultForExcel)
-					excelFile.close()
-					labelstatus2.setText('')
-					labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계 완료')
+					try:
+						labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계중  ' + str(progress + i + 1) + '/' + str(selectedPersonNum))
+						calcBoards = CalcMegastudy(IDList[i], endDate, startDate, delayTime, driver)  # url, startdate, enddate, waitTime, chromedriver
+						semiresult = calcBoards.calcBoard(check_stop_class, labelstatus2)  # processing pause : hk.kim-18.01.28
+						result = calcBoards.dataResult(semiresult, NameList[i], SubjectList[0])  # calcBoardResult, teacherName, subjectName
+						for j in range(0, len(result)):
+							subjectresultForExcel.append(result[j])
+						excelFile = workBook(filepath + '메가스터디_' + str(startDate) + '-' + str(endDate) + '.xlsx')
+						calcBoards.xlsxWrite(excelFile, subjectresultForExcel)
+						excelFile.close()
+						labelstatus2.setText('')
+						labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계 완료')
+					except Exception as e:
+						f = open("elog.txt", 'a')
+						f.write('main-926: 메가스터디 ' + NameList[i] + ' 선생님: ' + str(e))
+						f.close()
 				progress = progress + len(IDList)
 			labelstatus.setText('메가스터디 집계 종료 : 엑셀파일을 확인해주세요')
 
@@ -1048,18 +942,23 @@ class DataAnalyze(QThread):
 			# print(IDList)
 			subjectresultForExcel = []
 			for i in range(0, len(IDList)):
-				# print(NameList[i], IDList[i])
-				labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계중')
-				calcBoards = CalcMegastudy(IDList[i], endDate, startDate, delayTime, driver)  # url, startdate, enddate, waitTime, chromedriver
-				semiresult = calcBoards.calcBoard(check_stop_class, labelstatus2) #processing pause : hk.kim-18.01.28
-				result = calcBoards.dataResult(semiresult, NameList[i], SubjectList[i])  # calcBoardResult, teacherName, subjectName
-				for j in range(0, len(result)):
-					subjectresultForExcel.append(result[j])
-				excelFile = workBook(filepath + '메가스터디_개별_' + str(startDate) + '-' + str(endDate) + '.xlsx')
-				calcBoards.xlsxWrite(excelFile, subjectresultForExcel)
-				excelFile.close()
-				labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계 완료')
-				labelstatus2.setText('')
+				try:
+					# print(NameList[i], IDList[i])
+					labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계중')
+					calcBoards = CalcMegastudy(IDList[i], endDate, startDate, delayTime, driver)  # url, startdate, enddate, waitTime, chromedriver
+					semiresult = calcBoards.calcBoard(check_stop_class, labelstatus2) #processing pause : hk.kim-18.01.28
+					result = calcBoards.dataResult(semiresult, NameList[i], SubjectList[i])  # calcBoardResult, teacherName, subjectName
+					for j in range(0, len(result)):
+						subjectresultForExcel.append(result[j])
+					excelFile = workBook(filepath + '메가스터디_개별_' + str(startDate) + '-' + str(endDate) + '.xlsx')
+					calcBoards.xlsxWrite(excelFile, subjectresultForExcel)
+					excelFile.close()
+					labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계 완료')
+					labelstatus2.setText('')
+				except Exception as e:
+					f = open("elog.txt", 'a')
+					f.write('main-960: 메가스터디 ' + NameList[i] + ' 선생님: '+ str(e))
+					f.close()
 			labelstatus.setText('메가스터디 개별 집계 종료 : 엑셀파일을 확인해주세요')
 
 	def analyzeEBS(self, driver):
@@ -1223,19 +1122,24 @@ class DataAnalyze(QThread):
 						continue
 					except ValueError:
 						pass
-					labelstatus.setText('대성마이맥 ' + NameList[i] + ' 선생님 집계중  ' + str(progress + i + 1) + '/' + str(selectedPersonNum))
-					BoardAddr = DSsubjectObject[x].getIndivBoardAddress(IDList[i])
-					calcBoards = CalcDaesung(BoardAddr, endDate, startDate, delayTime, driver)  # url, startdate, enddate, waitTime, chromedriver
-					semiresult = calcBoards.calcBoard(check_stop_class, labelstatus2) #processing pause : hk.kim-18.01.28
-					result = calcBoards.dataResult(semiresult, NameList[i], SubjectList[0])  # calcBoardResult, teacherName, subjectName
-					for j in range(0, len(result)):
-						subjectresultForExcel.append(result[j])
-					labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계 완료')
-					labelstatus2.setText('')
-					excelFile = workBook(filepath + '대성마이맥_' + str(startDate) + '-' + str(endDate) + '.xlsx')
-					calcBoards.xlsxWrite(excelFile, subjectresultForExcel)
-					excelFile.close()
-					i_am_already_processed.append(IDList[i])
+					try:
+						labelstatus.setText('대성마이맥 ' + NameList[i] + ' 선생님 집계중  ' + str(progress + i + 1) + '/' + str(selectedPersonNum))
+						BoardAddr = DSsubjectObject[x].getIndivBoardAddress(IDList[i])
+						calcBoards = CalcDaesung(BoardAddr, endDate, startDate, delayTime, driver)  # url, startdate, enddate, waitTime, chromedriver
+						semiresult = calcBoards.calcBoard(check_stop_class, labelstatus2) #processing pause : hk.kim-18.01.28
+						result = calcBoards.dataResult(semiresult, NameList[i], SubjectList[0])  # calcBoardResult, teacherName, subjectName
+						for j in range(0, len(result)):
+							subjectresultForExcel.append(result[j])
+						labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계 완료')
+						labelstatus2.setText('')
+						excelFile = workBook(filepath + '대성마이맥_' + str(startDate) + '-' + str(endDate) + '.xlsx')
+						calcBoards.xlsxWrite(excelFile, subjectresultForExcel)
+						excelFile.close()
+						i_am_already_processed.append(IDList[i])
+					except Exception as e:
+						f = open("elog.txt", 'a')
+						f.write('main-1141: 대성마이맥 ' + NameList[i] + ' 선생님: ' + str(e))
+						f.close()
 				progress = progress + len(IDList)
 			labelstatus.setText('대성마이맥 집계 종료 : 엑셀파일을 확인해주세요')
 
@@ -1254,89 +1158,24 @@ class DataAnalyze(QThread):
 				SubjectList.append(selectedParseList3[i].split(':')[0])
 			subjectresultForExcel = []
 			for i in range(0, len(IDList)):
-				labelstatus.setText('대성마이맥 ' + NameList[i] + ' 선생님 집계중')
-				BoardAddr = dskorean.getIndivBoardAddress(IDList[i])
-				calcBoards = CalcDaesung(BoardAddr, endDate, startDate, delayTime, driver)  # url, startdate, enddate, waitTime, chromedriver
-				semiresult = calcBoards.calcBoard(check_stop_class, labelstatus2) #processing pause : hk.kim-18.01.28
-				result = calcBoards.dataResult(semiresult, NameList[i], SubjectList[i])  # calcBoardResult, teacherName, subjectName
-				for j in range(0, len(result)):
-					subjectresultForExcel.append(result[j])
-				labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계 완료')
-				labelstatus2.setText('')
-				excelFile = workBook(filepath + '대성마이맥_개별_' + str(startDate) + '-' + str(endDate) + '.xlsx')
-				calcBoards.xlsxWrite(excelFile, subjectresultForExcel)
-				excelFile.close()
-			labelstatus.setText('대성마이맥 개별 집계 종료 : 엑셀파일을 확인해주세요')
-
-	def analyzeSKY(self, driver):
-		def workBook(filename):
-			workbook = xlsxwriter.Workbook(filename)  # 'math.xlsx'
-			return workbook
-		if parsingMode == 0:
-			labelstatus.setText('스카이에듀 집계를 시작합니다.')
-			subjectresultForExcel = []
-			selectedPersonNum = 0
-			progress = 0
-			print("SKYsubjectObject",SKYsubjectObject)
-			for u in range(0, len(SKYsubjectObject)):
-				selectedPersonNum = len(SKYsubjectObject[u].getIDList()) + selectedPersonNum
-			for subject in SKYsubjectObject:  # 과목 루프
-				IDList = subject.getIDList()
-				NameList = subject.getNameList()
-				SubjectList = subject.getSubjectList()
-				QAAddressList = subject.getBoardAddressList(IDList)
-				if len(IDList) != len(NameList) and len(IDList) != len(QAAddressList):
-					labelstatus.setText('선생님 정보 개편됨 : 개발사에 문의해주세요')
-					break
-				for i, address in enumerate(QAAddressList):  # 선생님 루프
-					if address != None:
-						labelstatus.setText('스카이에듀 ' + NameList[i] + ' 선생님 집계중  ' + str(progress + i + 1) + '/' + str(selectedPersonNum))
-						calcBoards = CalcSkyedu(address, endDate, startDate, delayTime, driver)  # url, startdate, enddate, waitTime, chromedriver
-						semiresult = calcBoards.calcBoard(check_stop_class, labelstatus2) #processing pause : hk.kim-18.01.28
-						result = calcBoards.dataResult(semiresult, NameList[i], SubjectList[0])  # calcBoardResult, teacherName, subjectName
-						for parseddata in result:
-							subjectresultForExcel.append(parseddata)
-						labelstatus.setText('스카이에듀 ' + NameList[i] + ' 선생님 집계 완료')
-						labelstatus2.setText('')
-						excelFile = workBook(filepath + '스카이에듀_' + str(startDate) + '-' + str(endDate) + '.xlsx')
-						calcBoards.xlsxWrite(excelFile, subjectresultForExcel)
-						excelFile.close()
-					elif address == None:
-						pass
-				progress = progress + len(IDList)
-			labelstatus.setText('스카이에듀 집계 종료 : 엑셀파일을 확인해주세요')
-
-		elif parsingMode == 1:
-			labelstatus.setText('스카이에듀 개별 집계를 시작합니다.')
-			SKYdic = self.IdNameDicSKY()
-			print("SKYdic", SKYdic)
-			IDList = []
-			NameList = []
-			SubjectList = []
-			for i in range(0, len(selectedParseList4)):
-				# split = selectedParseList4[i].split(':')  # 국어: 김선겸
-				# IDList.append(SKYdic[split[1].lstrip()])
-				IDList.append(SKYdic[selectedParseList4[i].lstrip()])
-				NameList.append(selectedParseList4[i].split(':')[1].lstrip())
-				SubjectList.append(selectedParseList4[i].split(':')[0])
-			subjectresultForExcel = []
-			for i in range(0, len(IDList)):
-				labelstatus.setText('스카이에듀 ' + NameList[i] + ' 선생님 집계중')
-				if IDList[i]!=None:
-					BoardAddr = skykorean.getIndivBoardAddress(IDList[i])
-					calcBoards = CalcSkyedu(BoardAddr, endDate, startDate, delayTime, driver)  # url, startdate, enddate, waitTime, chromedriver
+				try:
+					labelstatus.setText('대성마이맥 ' + NameList[i] + ' 선생님 집계중')
+					BoardAddr = dskorean.getIndivBoardAddress(IDList[i])
+					calcBoards = CalcDaesung(BoardAddr, endDate, startDate, delayTime, driver)  # url, startdate, enddate, waitTime, chromedriver
 					semiresult = calcBoards.calcBoard(check_stop_class, labelstatus2) #processing pause : hk.kim-18.01.28
 					result = calcBoards.dataResult(semiresult, NameList[i], SubjectList[i])  # calcBoardResult, teacherName, subjectName
 					for j in range(0, len(result)):
 						subjectresultForExcel.append(result[j])
-					labelstatus.setText('스카이에듀 ' + NameList[i] + ' 선생님 집계 완료')
+					labelstatus.setText('메가스터디 ' + NameList[i] + ' 선생님 집계 완료')
 					labelstatus2.setText('')
-					excelFile = workBook(filepath + '스카이에듀_개별_' + str(startDate) + '-' + str(endDate) + '.xlsx')
+					excelFile = workBook(filepath + '대성마이맥_개별_' + str(startDate) + '-' + str(endDate) + '.xlsx')
 					calcBoards.xlsxWrite(excelFile, subjectresultForExcel)
 					excelFile.close()
-				else:
-					pass
-			labelstatus.setText('스카이에듀 개별 집계 종료 : 엑셀파일을 확인해주세요')
+				except Exception as e:
+					f = open("elog.txt", 'a')
+					f.write('main-1176: 대성마이맥 ' + NameList[i] + ' 선생님: ' + str(e))
+					f.close()
+			labelstatus.setText('대성마이맥 개별 집계 종료 : 엑셀파일을 확인해주세요')
 
 	def IdNameDicMEGA(self):  # 이름 : ID 딕셔너리
 		dicIdName = {}
@@ -1363,27 +1202,7 @@ class DataAnalyze(QThread):
 		#print(dicIdName)
 		return dicIdName
 
-	def IdNameDicSKY(self):
-		dicIdName = {}
-		# SKYsubjectObject = [skykorean, skymath, skyenglish, skykorhistory, skysociety, skyscience, skyuniv, skyforeign, skydaechi, skynaesin]
-		# SKYsubjectObject = [skykorean, skymath, skyenglish, skykorhistory, skysociety, skyscience, skyuniv, skyforeign, skynaesin]
-		SKYsubjectObject = [skykorean, skymath, skyenglish, skykorhistory, skysociety, skyscience, skyuniv, skyforeign]
-		for i in range(0, len(SKYsubjectObject)):
-			# tIdList = SKYsubjectObject[i].getIDList()
-			# tNameList = SKYsubjectObject[i].getNameList()
-			# print(len(tIdList), tIdList)
-			# print(len(tNameList), tNameList)
-			# for j in range(0, len(tIdList)):
-			# 	dicIdName[tNameList[j]] = tIdList[j]
-			tIdList = SKYsubjectObject[i].getIDList()
-			tNameList = SKYsubjectObject[i].getFullList()
-			print(len(tIdList), tIdList)
-			print(len(tNameList), tNameList)
-			for j in range(0, len(tIdList)):
-				dicIdName[tNameList[j]] = tIdList[j]
-		print("dicIdName",dicIdName)
-		return dicIdName
-
+	
 #processing pause : hk.kim-18.01.28
 class CheckPauseClass():
 	def get_is_pause(self):

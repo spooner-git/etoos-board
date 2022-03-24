@@ -1,0 +1,1 @@
+main-685: 'str' object has no attribute 'getFullList'

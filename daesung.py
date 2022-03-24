@@ -152,11 +152,12 @@ class CalcDaesung:  # 선생,과목, 게시판주소등을 토대로 본격적�
 			while pageconnected == 0:
 				try:
 					#self.driver.get(self.url)
-
 					WebDriverWait(self.driver, 3).until(EC.presence_of_element_located((By.CLASS_NAME, webdriverWaitFor_page)))
 					pageconnected = 1
 					time.sleep(self.waitTime)
 				except TimeoutException:
+					# self.driver.execute_script("document.getElementById('currPage').value = '%s'; document.getElementById('srchFrm').submit();" % (i + 1))
+					self.driver.refresh()
 					print('서버와 통신이 불안정 합니다. 재시도 합니다. Inner')
 					labelstatus.setText('서버와 통신이 불안정 합니다. 재접속을 시도합니다.')
 					#self.driver.get(self.url)
