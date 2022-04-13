@@ -140,7 +140,8 @@ class CalcDaesung:  # 선생,과목, 게시판주소등을 토대로 본격적�
 			except:
 					print('서버와 통신이 불안정 합니다. 재접속을 시도합니다.')
 					labelstatus.setText('서버와 통신이 불안정 합니다. 재접속을 시도합니다.')
-					time.sleep(1)
+					time.sleep(3)
+					self.driver.refresh()
 		print('Page_' + str(1) + ' --> Searching...')
 		for i in range(startpage, endpage):
 			pageconnected = 0
