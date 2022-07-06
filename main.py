@@ -878,7 +878,7 @@ class DataAnalyze(QThread):
 				resetButton.setDisabled(True)
 				labelstatus.setText('개별 집계 완료. 엑셀 파일을 확인해주세요')
 				driver.quit()
-			except:
+			except Exception as e:
 				f = open("elog.txt", "a")
 				f.write('main-940: ' + str(e))
 				f.close()
@@ -968,6 +968,8 @@ class DataAnalyze(QThread):
 		if parsingMode == 0:
 			labelstatus.setText('EBS 집계를 시작합니다.')
 			ebs.set_driver(driver)
+			subjectresultForExcel = []
+			end_teacher_list = []
 			# 과목 가져오기
 			lecture_array = ebs.get_lecture_list()
 			# 선생님 리스트 가져오기
@@ -976,8 +978,7 @@ class DataAnalyze(QThread):
 			teacher_array = ebs.update_teacher_code(teacher_array)
 			add_subject_name_list = EBSsubjectObject[:]
 			teacher_array = ebs.add_teacher_by_subject(teacher_array, add_subject_name_list)
-			subjectresultForExcel = []
-			end_teacher_list = []
+				
 			for teachers in teacher_array:
 				# 선생님 중복 걸러내기
 				check_duplicate_teacher = False
