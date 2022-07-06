@@ -973,7 +973,7 @@ class DataAnalyze(QThread):
 			# 선생님 리스트 가져오기
 			teacher_array = ebs.get_teacher_list(lecture_array)
 			# 선생님 코드 업데이트
-			teacher_array = ebs.update_teacher_code(teacher_array)
+			# teacher_array = ebs.update_teacher_code(teacher_array)
 			add_subject_name_list = EBSsubjectObject[:]
 			teacher_array = ebs.add_teacher_by_subject(teacher_array, add_subject_name_list)
 			subjectresultForExcel = []
@@ -990,7 +990,7 @@ class DataAnalyze(QThread):
 				end_teacher_list.append(teachers)
 				labelstatus.setText('EBS ' + str(teachers.get_name()) + ' 선생님 집계중')
 				# print(str(teachers.get_full_info()))
-				ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/lms/lmsy/courseQnaList.ajax?tchId='
+				ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/lms/lmsy/courseQnaList.ajax?dstgCd='
 								   + teachers.get_code() + '&currentPage=1&callBy=teacher&tabNm=qna&gotoYn=Y', 0)
 				startdate = str(startDate)[2:4] + '.' + str(startDate)[4:6] + '.' + str(startDate)[6:]
 				enddate = str(endDate)[2:4] + '.' + str(endDate)[4:6] + '.' + str(endDate)[6:]
@@ -1054,7 +1054,7 @@ class DataAnalyze(QThread):
 					continue
 				end_teacher_list.append(teachers)
 				labelstatus.setText('EBS ' + str(teachers.get_name()) + ' 선생님 집계중')
-				ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/lms/lmsy/courseQnaList.ajax?tchId='
+				ebs.go_to_url_page('http://www.ebsi.co.kr/ebs/lms/lmsy/courseQnaList.ajax?dstgCd='
 								   + teachers.get_code() + '&currentPage=1&callBy=teacher&tabNm=qna&gotoYn=Y', 0)
 				startdate = str(startDate)[2:4] + '.' + str(startDate)[4:6] + '.' + str(startDate)[6:]
 				enddate = str(endDate)[2:4] + '.' + str(endDate)[4:6] + '.' + str(endDate)[6:]

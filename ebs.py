@@ -130,7 +130,8 @@ class Ebs(Company):
         for teachers in teacher_array:
             self.go_to_url_page('https://www.ebsi.co.kr/ebs/pot/potg/retrieveCourseH3TeacherInfo.ebs?dstgCd=' + teachers.get_code(), 0)
 
-            tch_code_line = self.soup.find('input', {"name":"tchId"})
+            # tch_code_line = self.soup.find('input', {"name":"tchId"})
+            tch_code_line = self.soup.find('input', {"name":"dstgCd"})
             teachers.set_code(tch_code_line.attrs['value'])
 
         return teacher_array
@@ -200,7 +201,7 @@ class Ebs(Company):
             if end_point == 1:
                 break
             else:
-                self.go_to_url_page('http://www.ebsi.co.kr/ebs/lms/lmsy/courseQnaList.ajax?tchId='
+                self.go_to_url_page('http://www.ebsi.co.kr/ebs/lms/lmsy/courseQnaList.ajax?dstgCd='
                                    + teacher_code + '&currentPage='+str(bbs_page)+'&callBy=teacher&tabNm=qna&gotoYn=Y', 0)
                 page_counter += 1
                 labelstatus.setText('Page_' + str(page_counter) + ' --> Searching...')
